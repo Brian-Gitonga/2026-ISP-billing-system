@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force light mode and prevent dark mode issues */
+* {
+  color-scheme: light !important;
+}
+
+html, body {
+  background-color: white !important;
+  color: #121212 !important;
+}
+
+/* Ensure all elements are visible */
+* {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure inputs are always visible */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+  color: #121212 !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Ensure labels are visible */
+label {
+  color: #374151 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure buttons are visible */
+button {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure divs and containers are visible */
+div {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
