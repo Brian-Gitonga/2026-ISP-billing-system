@@ -116,9 +116,9 @@ export async function initiateSTKPush(
   }
 
   // Use the configured callback URL
-  let callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://2039453e205c.ngrok-free.app/api/mpesa/callback';
+  let callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://qtroisp.netlify.app/api/mpesa/callback';
 
-  // Always use the real callback URL since you mentioned ngrok is working well
+  // Use the configured callback URL from environment variables
   console.log('🔗 Using callback URL:', callbackUrl);
 
   // Validate that we have a proper HTTPS callback URL
