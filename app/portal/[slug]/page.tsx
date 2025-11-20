@@ -64,15 +64,29 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
 
   const fetchPlans = async () => {
     try {
+      console.log('🔍 Looking for portal slug:', slug);
+
       // Get user by portal slug
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, business_name, phone_number')
+        .select('id, business_name, phone_number, portal_slug')
         .eq('portal_slug', slug)
         .single();
 
+      console.log('📋 Profile query result:', { profile, profileError });
+
       if (!profile) {
-        showNotification('error', 'Portal not found');
+        console.error('❌ No profile found for slug:', slug);
+
+        // Let's also check what portal slugs exist
+        const { data: allProfiles } = await supabase
+          .from('profiles')
+          .select('portal_slug')
+          .not('portal_slug', 'is', null);
+
+        console.log('📝 Available portal slugs:', allProfiles);
+
+        showNotification('error', `Portal not found for slug: ${slug}. Check console for available slugs.`);
         return;
       }
 
@@ -215,15 +229,20 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
     setVoucherLoading(true);
 
     try {
+      console.log('🔍 View voucher - Looking for portal slug:', slug);
+
       // Get user by portal slug first
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, portal_slug')
         .eq('portal_slug', slug)
         .single();
 
+      console.log('📋 View voucher - Profile query result:', { profile, profileError });
+
       if (!profile) {
-        showNotification('error', 'Portal not found');
+        console.error('❌ View voucher - No profile found for slug:', slug);
+        showNotification('error', `Portal not found for slug: ${slug}`);
         return;
       }
 
