@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Create Supabase client with service role key for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Helper function to create Supabase admin client
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey);
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Create Supabase admin client
+    const supabaseAdmin = getSupabaseAdmin();
+
     // Verify admin session
     const authHeader = request.headers.get('authorization');
     console.log('Auth header:', authHeader);
@@ -20,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const sessionToken = authHeader.substring(7);
     console.log('Session token:', sessionToken ? 'Present' : 'Missing');
-    
+
     // Verify admin session - simplified version
     const { data: sessions, error: sessionError } = await supabaseAdmin
       .from('admin_sessions')

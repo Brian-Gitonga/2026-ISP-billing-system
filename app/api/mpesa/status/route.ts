@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { querySTKPushStatus } from '@/lib/mpesa';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = new URL(request.url);
     const checkoutRequestId = searchParams.get('checkoutRequestId');
 
     if (!checkoutRequestId) {
