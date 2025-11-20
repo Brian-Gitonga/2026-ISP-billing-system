@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { querySTKPushStatus } from '@/lib/mpesa';
+
+// Helper function to create Supabase admin client
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
@@ -13,6 +30,8 @@ export async function GET(request: NextRequest) {
     if (!checkoutRequestId) {
       return NextResponse.json({ error: 'Missing checkoutRequestId' }, { status: 400 });
     }
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     // Find the transaction in our database
     const { data: transaction, error } = await supabaseAdmin

@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Helper function to create Supabase admin client
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 // Test endpoint to verify callback URL is reachable
 export async function GET() {
@@ -19,6 +36,8 @@ export async function POST(request: NextRequest) {
     const { Body } = body;
     const { stkCallback } = Body;
     const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = stkCallback;
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     // Find the transaction
     const { data: transaction, error: fetchError } = await supabaseAdmin
