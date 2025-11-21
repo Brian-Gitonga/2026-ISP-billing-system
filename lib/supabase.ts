@@ -1,14 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import { getConfig } from './config';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+const config = getConfig();
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(config.supabase.url, config.supabase.anonKey);
 
 // Server-side client with service role key
 export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key',
+  config.supabase.url,
+  config.supabase.serviceRoleKey,
   {
     auth: {
       autoRefreshToken: false,
@@ -20,10 +20,10 @@ export const supabaseAdmin = createClient(
 // Helper function to check if Supabase is properly configured
 export const isSupabaseConfigured = () => {
   return !!(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && 
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'placeholder-key'
+    config.supabase.url &&
+    config.supabase.anonKey &&
+    config.supabase.url !== 'https://placeholder.supabase.co' &&
+    config.supabase.anonKey !== 'placeholder-key'
   );
 };
 

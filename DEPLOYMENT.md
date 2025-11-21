@@ -1,31 +1,5 @@
 # Deployment Guide
 
-## 🚀 Current Deployment Strategy (Repository-Based Environment Variables)
-
-**This project now uses repository-committed environment variables for reliable deployment.**
-
-### Why This Approach?
-- ✅ **100% Reliability**: All environment variables are guaranteed to be available
-- ✅ **No Configuration Needed**: Netlify automatically reads `.env` files from repository
-- ✅ **Same as Localhost**: Identical configuration ensures consistency
-- ✅ **Easy Debugging**: Can verify exactly which variables are being used
-
-### Files Committed:
-- `.env` - Production environment variables (used by Netlify)
-- `.env.production` - Explicit production configuration
-- `.env.local` - Development environment (localhost)
-
-### Deployment Process:
-1. **Push to GitHub** → Environment files are included automatically
-2. **Netlify Auto-Deploy** → Reads `.env` file and builds successfully
-3. **All Features Work** → Admin login, payments, portal functionality
-
-**No manual environment variable configuration needed in Netlify dashboard!**
-
----
-
-## Alternative: Platform Dashboard Variables (Previous Method)
-
 ## Prerequisites
 
 - GitHub account

@@ -2,17 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { getConfig } from '@/lib/config';
 
 // Helper function to create Supabase admin client
 function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing Supabase environment variables');
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey);
+  const config = getConfig();
+  return createClient(config.supabase.url, config.supabase.serviceRoleKey);
 }
 
 export async function POST(request: NextRequest) {

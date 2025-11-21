@@ -1,6 +1,9 @@
 import axios from 'axios';
+import { getConfig } from './config';
 
-const MPESA_BASE_URL = process.env.MPESA_ENVIRONMENT === 'production'
+const config = getConfig();
+
+const MPESA_BASE_URL = config.mpesa.environment === 'production'
   ? 'https://api.safaricom.co.ke'
   : 'https://sandbox.safaricom.co.ke';
 
@@ -43,7 +46,7 @@ export async function getMpesaAccessToken(): Promise<string> {
   }
 
   const auth = Buffer.from(
-    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
+    `${config.mpesa.consumerKey}:${config.mpesa.consumerSecret}`
   ).toString('base64');
 
   try {
@@ -87,7 +90,7 @@ export function generateMpesaPassword(): { password: string; timestamp: string }
     .slice(0, 14);
 
   const password = Buffer.from(
-    `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`
+    `${config.mpesa.shortcode}${config.mpesa.passkey}${timestamp}`
   ).toString('base64');
 
   return { password, timestamp };
@@ -115,10 +118,9 @@ export async function initiateSTKPush(
     formattedPhone = '254' + formattedPhone;
   }
 
-  // Use the configured callback URL
-  let callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://qtroisp.netlify.app/api/mpesa/callback';
-
-  // Use the configured callback URL from environment variables
+  // Use the configured callback URL from config
+  const callbackUrl = config.mpesa.callbackUrl;
+  
   console.log('🔗 Using callback URL:', callbackUrl);
 
   // Validate that we have a proper HTTPS callback URL
@@ -126,18 +128,16 @@ export async function initiateSTKPush(
     console.warn('⚠️  M-Pesa callback URL should be HTTPS:', callbackUrl);
   }
 
-  const finalCallbackUrl = callbackUrl;
-
   const payload = {
-    BusinessShortCode: process.env.MPESA_SHORTCODE,
+    BusinessShortCode: config.mpesa.shortcode,
     Password: password,
     Timestamp: timestamp,
     TransactionType: 'CustomerPayBillOnline',
     Amount: Math.ceil(amount),
     PartyA: formattedPhone,
-    PartyB: process.env.MPESA_SHORTCODE,
+    PartyB: config.mpesa.shortcode,
     PhoneNumber: formattedPhone,
-    CallBackURL: finalCallbackUrl,
+    CallBackURL: callbackUrl,
     AccountReference: accountReference,
     TransactionDesc: transactionDesc,
   };
@@ -185,7 +185,7 @@ export async function querySTKPushStatus(checkoutRequestId: string): Promise<any
   const { password, timestamp } = generateMpesaPassword();
 
   const payload = {
-    BusinessShortCode: process.env.MPESA_SHORTCODE,
+    BusinessShortCode: config.mpesa.shortcode,
     Password: password,
     Timestamp: timestamp,
     CheckoutRequestID: checkoutRequestId,
