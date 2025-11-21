@@ -115,13 +115,8 @@ export async function initiateSTKPush(
     formattedPhone = '254' + formattedPhone;
   }
 
-    // Use the configured callback URL from environment variables
-    const callbackUrl = process.env.MPESA_CALLBACK_URL;
-  
-    // Validate that callback URL is configured
-    if (!callbackUrl) {
-      throw new Error('MPESA_CALLBACK_URL environment variable is not configured');
-    }
+  // Use the configured callback URL
+  let callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://qtroisp.netlify.app/api/mpesa/callback';
 
   // Use the configured callback URL from environment variables
   console.log('🔗 Using callback URL:', callbackUrl);
