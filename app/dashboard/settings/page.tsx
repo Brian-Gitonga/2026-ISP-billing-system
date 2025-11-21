@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/types';
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { Copy, Check, ExternalLink, Download, Wifi } from 'lucide-react';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [formData, setFormData] = useState({
     business_name: '',
     phone_number: '',
@@ -110,6 +111,37 @@ export default function SettingsPage() {
   const openPortal = () => {
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/${formData.portal_slug}`;
     window.open(portalUrl, '_blank');
+  };
+
+  const downloadCaptivePortal = async () => {
+    if (!profile?.id || !formData.portal_slug) {
+      alert('Please save your portal slug first');
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      const response = await fetch(`/api/captive-portal/download?userId=${profile.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate captive portal');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotspot-login-${formData.portal_slug}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading captive portal:', error);
+      alert('Failed to download captive portal');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (loading) {
@@ -222,6 +254,68 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
+
+        {/* MikroTik Captive Portal */}
+        {formData.portal_slug && (
+          <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-2 border-purple-500/30 rounded-xl p-6 mb-6">
+            <div className="flex items-start space-x-4">
+              <div className="bg-purple-600 rounded-lg p-3">
+                <Wifi className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-white mb-2">MikroTik Captive Portal</h2>
+                <p className="text-gray-300 text-sm mb-4">
+                  Download a ready-to-use captive portal HTML file for your MikroTik router.
+                  When users connect to your WiFi, they'll see your voucher portal automatically.
+                </p>
+                
+                <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+                  <h3 className="text-white font-semibold mb-2 flex items-center">
+                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded mr-2">1</span>
+                    Download the captive portal file
+                  </h3>
+                  <button
+                    onClick={downloadCaptivePortal}
+                    disabled={downloading}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{downloading ? 'Generating...' : 'Download Captive Portal'}</span>
+                  </button>
+                </div>
+
+                <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+                  <h3 className="text-white font-semibold mb-2 flex items-center">
+                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded mr-2">2</span>
+                    Upload to MikroTik
+                  </h3>
+                  <ol className="text-gray-300 text-sm space-y-1 ml-6 list-decimal">
+                    <li>Open WinBox and connect to your MikroTik router</li>
+                    <li>Go to <code className="bg-gray-700 px-1 rounded">Files</code></li>
+                    <li>Upload the downloaded HTML file</li>
+                    <li>Go to <code className="bg-gray-700 px-1 rounded">IP → Hotspot → Server Profiles</code></li>
+                    <li>Select your hotspot profile and set <code className="bg-gray-700 px-1 rounded">HTML Directory</code> to <code className="bg-gray-700 px-1 rounded">hotspot</code></li>
+                    <li>Replace the default <code className="bg-gray-700 px-1 rounded">login.html</code> with your downloaded file</li>
+                  </ol>
+                </div>
+
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <h3 className="text-blue-400 font-medium mb-2 flex items-center">
+                    <span className="mr-2">💡</span>
+                    What's included?
+                  </h3>
+                  <ul className="text-gray-300 text-sm space-y-1">
+                    <li>✅ Voucher code login form</li>
+                    <li>✅ Embedded portal for instant voucher purchase</li>
+                    <li>✅ Your business name and branding</li>
+                    <li>✅ Mobile-responsive design</li>
+                    <li>✅ Error handling for invalid vouchers</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Payout Settings */}
         <div className="bg-gray-800 rounded-xl p-6 mb-6">

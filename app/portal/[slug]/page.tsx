@@ -331,7 +331,7 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
       )}
 
       <div className="max-w-md mx-auto">
-        {/* Header */}
+        {/* Header 
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="bg-primary rounded-full p-4">
@@ -343,7 +343,7 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
             Choose the best plan for you and connect with us. we are the best in town
           </p>
         </div>
-
+        */}
         {/* Tabs */}
         <div className="flex bg-white rounded-xl p-1 mb-6 shadow-sm">
           <button
@@ -458,13 +458,6 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
 
         {/* Action Buttons */}
         <div className="space-y-3 mb-6">
-          <button
-            onClick={handleConnectWithVoucher}
-            className="w-full bg-primary hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center space-x-2"
-          >
-            <Wifi className="w-5 h-5" />
-            <span>Connect with Voucher</span>
-          </button>
 
           <button
             onClick={() => setShowViewVoucherModal(true)}
