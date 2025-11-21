@@ -11,20 +11,18 @@ export const config = {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJneWZvb3JiZG9sd2R6ZmRzY3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODQyNDUsImV4cCI6MjA3ODI2MDI0NX0.jp9NH-EdS5x8bbKvZYBXocaIoLRt0okZHOCiwSYif_4',
     serviceRoleKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJneWZvb3JiZG9sd2R6ZmRzY3ZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjY4NDI0NSwiZXhwIjoyMDc4MjYwMjQ1fQ.yatR8Wa_pQyIyoyWP4ZaXMDr9YcNTZ_1lugvADNIDxE',
   },
-
   // M-Pesa Configuration
   mpesa: {
     consumerKey: 'bAoiO0bYMLsAHDgzGSGVMnpSAxSUuCMEfWkrrAOK1MZJNAcA',
     consumerSecret: '2idZFLPp26Du8JdF9SB3nLpKrOJO67qDIkvICkkVl7OhADTQCb0Oga5wNgzu1xQx',
     shortcode: '174379',
     passkey: 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-    callbackUrl: 'https://qtroisp.netlify.app/api/mpesa/callback',
+    callbackUrl: 'https://2026-isp-billing-system.vercel.app/api/mpesa/callback',
     environment: 'sandbox', // 'sandbox' or 'production'
   },
-
   // Application Configuration
   app: {
-    url: 'https://qtroisp.netlify.app',
+    url: 'https://2026-isp-billing-system.vercel.app',
   },
 };
 
