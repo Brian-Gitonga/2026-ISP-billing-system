@@ -14,11 +14,8 @@ export default function SignupPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
     // Check if user is already logged in
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -26,7 +23,7 @@ export default function SignupPage() {
         router.push('/dashboard');
       }
     };
-    
+
     checkUser();
   }, [router]);
 
@@ -70,15 +67,6 @@ export default function SignupPage() {
       setLoading(false);
     }
   };
-
-  // Don't render until mounted to prevent hydration issues
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 px-4 py-8 bg-black">

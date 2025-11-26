@@ -12,15 +12,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
   const [supabaseConfigured, setSupabaseConfigured] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
     const configured = isSupabaseConfigured();
     setSupabaseConfigured(configured);
-    
+
     // Only check user if Supabase is configured
     if (configured) {
       const checkUser = async () => {
@@ -34,7 +31,7 @@ export default function LoginPage() {
           // Don't redirect on error, just show the login form
         }
       };
-      
+
       checkUser();
     }
   }, [router]);
@@ -65,15 +62,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  // Show loading spinner only for a brief moment to prevent hydration issues
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 px-4">
