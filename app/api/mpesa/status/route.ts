@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { querySTKPushStatus } from '@/lib/mpesa';
-import { getConfig } from '@/lib/config';
-
-// Helper function to create Supabase admin client
-function getSupabaseAdmin() {
-  const config = getConfig();
-  return createClient(config.supabase.url, config.supabase.serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
+import { supabaseAdmin } from '@/lib/supabase';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
@@ -25,8 +13,6 @@ export async function GET(request: NextRequest) {
     if (!checkoutRequestId) {
       return NextResponse.json({ error: 'Missing checkoutRequestId' }, { status: 400 });
     }
-
-    const supabaseAdmin = getSupabaseAdmin();
 
     // Find the transaction in our database
     const { data: transaction, error } = await supabaseAdmin

@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getConfig } from '@/lib/config';
-
-// Helper function to create Supabase admin client
-function getSupabaseAdmin() {
-  const config = getConfig();
-  return createClient(config.supabase.url, config.supabase.serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
+import { supabaseAdmin } from '@/lib/supabase';
 
 // Test endpoint to verify callback URL is reachable
 export async function GET() {
@@ -31,8 +19,6 @@ export async function POST(request: NextRequest) {
     const { Body } = body;
     const { stkCallback } = Body;
     const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = stkCallback;
-
-    const supabaseAdmin = getSupabaseAdmin();
 
     // Find the transaction
     const { data: transaction, error: fetchError } = await supabaseAdmin

@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getConfig } from '@/lib/config';
-
-// Helper function to create Supabase admin client
-function getSupabaseAdmin() {
-  const config = getConfig();
-  return createClient(config.supabase.url, config.supabase.serviceRoleKey);
-}
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
-    // Create Supabase admin client
-    const supabaseAdmin = getSupabaseAdmin();
-
     const { session_token } = await request.json();
 
     if (!session_token) {
@@ -72,9 +62,6 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Create Supabase admin client
-    const supabaseAdmin = getSupabaseAdmin();
-
     const { session_token } = await request.json();
 
     if (!session_token) {

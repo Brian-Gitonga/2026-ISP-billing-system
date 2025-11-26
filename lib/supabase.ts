@@ -1,36 +1,46 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getConfig } from './config';
 
-// Singleton instances
+// Global singleton instances
 let supabaseInstance: SupabaseClient | null = null;
 let supabaseAdminInstance: SupabaseClient | null = null;
 
-// Get or create the main Supabase client
-export const supabase = (() => {
-  if (!supabaseInstance) {
-    const config = getConfig();
-    supabaseInstance = createClient(config.supabase.url, config.supabase.anonKey);
-  }
-  return supabaseInstance;
-})();
-
-// Get or create the admin Supabase client
-export const supabaseAdmin = (() => {
-  if (!supabaseAdminInstance) {
-    const config = getConfig();
-    supabaseAdminInstance = createClient(
-      config.supabase.url,
-      config.supabase.serviceRoleKey,
-      {
+// Create a proxy object that lazily initializes the client
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(target, prop) {
+    if (!supabaseInstance) {
+      const config = getConfig();
+      supabaseInstance = createClient(config.supabase.url, config.supabase.anonKey, {
         auth: {
-          autoRefreshToken: false,
-          persistSession: false
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
         }
-      }
-    );
+      });
+    }
+    return (supabaseInstance as any)[prop];
   }
-  return supabaseAdminInstance;
-})();
+});
+
+// Create a proxy object that lazily initializes the admin client
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(target, prop) {
+    if (!supabaseAdminInstance) {
+      const config = getConfig();
+      supabaseAdminInstance = createClient(
+        config.supabase.url,
+        config.supabase.serviceRoleKey,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+    }
+    return (supabaseAdminInstance as any)[prop];
+  }
+});
 
 // Helper function to check if Supabase is properly configured
 export const isSupabaseConfigured = () => {

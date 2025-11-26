@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initiateSTKPush } from '@/lib/mpesa';
-import { createClient } from '@supabase/supabase-js';
-import { getConfig } from '@/lib/config';
-
-// Helper function to create Supabase admin client
-function getSupabaseAdmin() {
-  const config = getConfig();
-  return createClient(config.supabase.url, config.supabase.serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,8 +12,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const supabaseAdmin = getSupabaseAdmin();
 
     // Get user by portal slug
     const { data: profile, error: profileError } = await supabaseAdmin

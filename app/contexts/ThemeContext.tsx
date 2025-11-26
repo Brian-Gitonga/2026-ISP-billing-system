@@ -16,35 +16,43 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark'); // Default to dark theme
   const [mounted, setMounted] = useState(false);
 
-  // Handle hydration
+  // Handle hydration and theme initialization
   useEffect(() => {
     setMounted(true);
-    
-    // Check for saved theme preference or default to dark
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      setThemeState(savedTheme);
-    } else {
-      // Default to dark theme
-      setThemeState('dark');
-      localStorage.setItem('theme', 'dark');
+
+    // Only access localStorage after mounting
+    try {
+      const savedTheme = localStorage.getItem('theme') as Theme;
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        setThemeState(savedTheme);
+      } else {
+        // Default to dark theme
+        localStorage.setItem('theme', 'dark');
+      }
+    } catch (error) {
+      // Handle localStorage access errors (e.g., in SSR)
+      console.warn('Could not access localStorage:', error);
     }
   }, []);
 
   // Apply theme to document
   useEffect(() => {
     if (!mounted) return;
-    
-    const root = document.documentElement;
-    
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark');
-    
-    // Add current theme class
-    root.classList.add(theme);
-    
-    // Save to localStorage
-    localStorage.setItem('theme', theme);
+
+    try {
+      const root = document.documentElement;
+
+      // Remove existing theme classes
+      root.classList.remove('light', 'dark');
+
+      // Add current theme class
+      root.classList.add(theme);
+
+      // Save to localStorage
+      localStorage.setItem('theme', theme);
+    } catch (error) {
+      console.warn('Could not apply theme:', error);
+    }
   }, [theme, mounted]);
 
   const setTheme = (newTheme: Theme) => {
@@ -55,14 +63,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <div className="dark">{children}</div>;
-  }
-
+  // Always render the same structure to prevent hydration mismatch
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      <div className={theme}>
+      <div className={mounted ? theme : 'dark'}>
         {children}
       </div>
     </ThemeContext.Provider>
