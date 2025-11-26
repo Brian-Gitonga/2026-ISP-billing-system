@@ -121,27 +121,27 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400">Here's what's happening with your ISP business today.</p>
+        <h1 className="text-3xl font-bold text-marketplace-text mb-2">Welcome back</h1>
+        <p className="text-marketplace-text-muted">Here's what's happening with your ISP business today.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Revenue This Month */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-green-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-green-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-green-500/10 p-3 rounded-lg">
               <DollarSign className="w-6 h-6 text-green-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">REVENUE THIS MONTH</h3>
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">REVENUE THIS MONTH</h3>
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-white">
+            <p className="text-3xl font-bold text-marketplace-text">
               KSh {stats.revenueThisMonth.toLocaleString()}
             </p>
           </div>
           <div className="mt-3 flex items-center">
-            <span className="text-xs text-gray-400">vs last month</span>
+            <span className="text-xs text-marketplace-text-muted">vs last month</span>
             <span
               className={`ml-2 text-xs font-semibold flex items-center ${
                 monthlyChange >= 0 ? 'text-green-500' : 'text-red-500'
@@ -158,20 +158,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Subscribed Hotspot Clients */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-blue-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-blue-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-blue-500/10 p-3 rounded-lg">
               <Users className="w-6 h-6 text-blue-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">
             SUBSCRIBED HOTSPOT CLIENTS
           </h3>
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-white">{stats.subscribedHotspotClients}</p>
+            <p className="text-3xl font-bold text-marketplace-text">{stats.subscribedHotspotClients}</p>
           </div>
           <div className="mt-3 flex items-center">
-            <span className="text-xs text-gray-400">vs last month</span>
+            <span className="text-xs text-marketplace-text-muted">vs last month</span>
             <span className="ml-2 text-xs font-semibold flex items-center text-blue-500">
               <TrendingUp className="w-3 h-3 mr-1" />
               0%
@@ -180,18 +180,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Subscribed PPOE Clients */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-pink-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-pink-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-pink-500/10 p-3 rounded-lg">
               <Wifi className="w-6 h-6 text-pink-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">SUBSCRIBED PPOE CLIENTS</h3>
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">SUBSCRIBED PPOE CLIENTS</h3>
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-white">{stats.subscribedPPOEClients}</p>
+            <p className="text-3xl font-bold text-marketplace-text">{stats.subscribedPPOEClients}</p>
           </div>
           <div className="mt-3 flex items-center">
-            <span className="text-xs text-gray-400">vs last month</span>
+            <span className="text-xs text-marketplace-text-muted">vs last month</span>
             <span className="ml-2 text-xs font-semibold flex items-center text-pink-500">
               <TrendingUp className="w-3 h-3 mr-1" />
               0%
@@ -200,20 +200,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Weekly Revenue */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-yellow-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-yellow-500">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-yellow-500/10 p-3 rounded-lg">
               <DollarSign className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">WEEKLY REVENUE</h3>
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">WEEKLY REVENUE</h3>
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-white">
+            <p className="text-3xl font-bold text-marketplace-text">
               KSh {stats.weeklyRevenue.toLocaleString()}
             </p>
           </div>
           <div className="mt-3 flex items-center">
-            <span className="text-xs text-gray-400">vs last week</span>
+            <span className="text-xs text-marketplace-text-muted">vs last week</span>
             <span className="ml-2 text-xs font-semibold flex items-center text-yellow-500">
               <TrendingUp className="w-3 h-3 mr-1" />
               0%
@@ -223,8 +223,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gray-800 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+      <div className="bg-marketplace-card rounded-xl p-6">
+        <h2 className="text-xl font-bold text-marketplace-text mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <a
             href="/dashboard/vouchers"
@@ -240,7 +240,7 @@ export default function DashboardPage() {
           </a>
           <a
             href="/dashboard/settings"
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition text-center"
+            className="bg-marketplace-hover hover:bg-marketplace-border text-marketplace-text font-semibold py-4 px-6 rounded-lg transition text-center"
           >
             View Portal Link
           </a>

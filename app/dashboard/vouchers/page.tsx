@@ -3,7 +3,31 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Voucher, Plan } from '@/lib/types';
-import { Upload, Trash2, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, Trash2, Download, ChevronLeft, ChevronRight, FileText, X, Check } from 'lucide-react';
+
+// CSV parsing utility
+function parseCSV(csvText: string): string[][] {
+  const lines = csvText.split('\n').filter(line => line.trim());
+  return lines.map(line => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim().replace(/^"|"$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^"|"$/g, ''));
+    return result;
+  });
+}
 
 export default function VouchersPage() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
@@ -13,6 +37,29 @@ export default function VouchersPage() {
   const [selectedPlan, setSelectedPlan] = useState('');
   const [voucherCodes, setVoucherCodes] = useState('');
   const [uploading, setUploading] = useState(false);
+
+  // CSV upload state
+  const [uploadMode, setUploadMode] = useState<'text' | 'csv'>('text');
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvData, setCsvData] = useState<string[][]>([]);
+  const [selectedColumn, setSelectedColumn] = useState<number>(0);
+  const [csvPreview, setCsvPreview] = useState<string[][]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Upload progress state
+  const [uploadProgress, setUploadProgress] = useState<{
+    total: number;
+    processed: number;
+    successful: number;
+    failed: number;
+    errors: string[];
+  }>({
+    total: 0,
+    processed: 0,
+    successful: 0,
+    failed: 0,
+    errors: []
+  });
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,53 +103,110 @@ export default function VouchersPage() {
   };
 
   const handleUploadVouchers = async () => {
-    if (!selectedPlan || !voucherCodes.trim()) {
-      alert('Please select a plan and enter voucher codes');
+    if (!selectedPlan) {
+      alert('Please select a plan');
+      return;
+    }
+
+    let codes: string[] = [];
+
+    if (uploadMode === 'csv' && csvData.length > 0) {
+      // Extract codes from selected column, skip header row
+      codes = csvData
+        .slice(1) // Skip header
+        .map(row => row[selectedColumn] || '')
+        .map(code => code.trim())
+        .filter(code => code.length > 0);
+    } else if (uploadMode === 'text' && voucherCodes.trim()) {
+      // Original text-based upload
+      codes = voucherCodes
+        .split('\n')
+        .map((code) => code.trim())
+        .filter((code) => code.length > 0);
+    }
+
+    if (codes.length === 0) {
+      alert('No valid voucher codes found');
       return;
     }
 
     setUploading(true);
 
+    // Initialize progress
+    setUploadProgress({
+      total: codes.length,
+      processed: 0,
+      successful: 0,
+      failed: 0,
+      errors: []
+    });
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Split voucher codes by newline and filter empty lines
-      const codes = voucherCodes
-        .split('\n')
-        .map((code) => code.trim())
-        .filter((code) => code.length > 0);
+      // Process vouchers in batches for better progress tracking
+      const batchSize = 50;
+      let successful = 0;
+      let failed = 0;
+      const errors: string[] = [];
 
-      if (codes.length === 0) {
-        alert('No valid voucher codes found');
-        return;
-      }
+      for (let i = 0; i < codes.length; i += batchSize) {
+        const batch = codes.slice(i, i + batchSize);
 
-      // Prepare voucher data
-      const vouchersToInsert = codes.map((code) => ({
-        user_id: user.id,
-        plan_id: selectedPlan,
-        voucher_code: code,
-        status: 'available',
-      }));
+        // Prepare voucher data for this batch
+        const vouchersToInsert = batch.map((code) => ({
+          user_id: user.id,
+          plan_id: selectedPlan,
+          voucher_code: code,
+          status: 'available',
+        }));
 
-      // Insert vouchers
-      const { error } = await supabase.from('vouchers').insert(vouchersToInsert);
+        try {
+          // Insert batch
+          const { error } = await supabase.from('vouchers').insert(vouchersToInsert);
 
-      if (error) {
-        if (error.code === '23505') {
-          alert('Some voucher codes already exist. Please check and try again.');
-        } else {
-          throw error;
+          if (error) {
+            if (error.code === '23505') {
+              // Handle duplicate codes
+              const duplicates = batch.length;
+              failed += duplicates;
+              errors.push(`${duplicates} duplicate voucher codes in batch ${Math.floor(i/batchSize) + 1}`);
+            } else {
+              failed += batch.length;
+              errors.push(`Batch ${Math.floor(i/batchSize) + 1} failed: ${error.message}`);
+            }
+          } else {
+            successful += batch.length;
+          }
+        } catch (batchError: any) {
+          failed += batch.length;
+          errors.push(`Batch ${Math.floor(i/batchSize) + 1} error: ${batchError.message}`);
         }
-        return;
+
+        // Update progress
+        setUploadProgress({
+          total: codes.length,
+          processed: Math.min(i + batchSize, codes.length),
+          successful,
+          failed,
+          errors
+        });
+
+        // Small delay to show progress
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      alert(`Successfully uploaded ${codes.length} vouchers!`);
-      setShowUploadModal(false);
-      setVoucherCodes('');
-      setSelectedPlan('');
-      fetchData();
+      // Show final results
+      if (successful > 0) {
+        alert(`Successfully uploaded ${successful} vouchers!${failed > 0 ? ` ${failed} failed.` : ''}`);
+        setShowUploadModal(false);
+        resetUploadModal();
+        setSelectedPlan('');
+        fetchData();
+      } else {
+        alert('No vouchers were uploaded successfully. Please check for duplicates or errors.');
+      }
     } catch (error) {
       console.error('Error uploading vouchers:', error);
       alert('Failed to upload vouchers');
@@ -149,6 +253,76 @@ export default function VouchersPage() {
     a.click();
   };
 
+  // CSV handling functions
+  const handleCSVUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csvText = e.target?.result as string;
+      const parsed = parseCSV(csvText);
+      setCsvData(parsed);
+
+      // Show preview of first 5 rows
+      setCsvPreview(parsed.slice(0, 5));
+
+      // Auto-detect username/voucher column
+      const headers = parsed[0] || [];
+      const usernameIndex = headers.findIndex(header =>
+        header.toLowerCase().includes('username') ||
+        header.toLowerCase().includes('voucher') ||
+        header.toLowerCase().includes('code')
+      );
+      setSelectedColumn(usernameIndex >= 0 ? usernameIndex : 0);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const csvFile = files.find(file =>
+      file.name.endsWith('.csv') || file.type === 'text/csv'
+    );
+
+    if (csvFile) {
+      setCsvFile(csvFile);
+      setUploadMode('csv');
+      handleCSVUpload(csvFile);
+    } else {
+      alert('Please drop a CSV file');
+    }
+  };
+
+  const resetUploadModal = () => {
+    setUploadMode('text');
+    setCsvFile(null);
+    setCsvData([]);
+    setCsvPreview([]);
+    setSelectedColumn(0);
+    setVoucherCodes('');
+    setUploadProgress({
+      total: 0,
+      processed: 0,
+      successful: 0,
+      failed: 0,
+      errors: []
+    });
+  };
+
   // Calculate stats
   const stats = {
     total: vouchers.length,
@@ -191,19 +365,22 @@ export default function VouchersPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Vouchers</h1>
-          <p className="text-gray-400">Manage your WiFi vouchers</p>
+          <h1 className="text-3xl font-bold text-marketplace-text mb-2">Vouchers</h1>
+          <p className="text-marketplace-text-muted">Manage your WiFi vouchers</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={exportVouchers}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+            className="bg-marketplace-hover hover:bg-marketplace-border text-marketplace-text px-4 py-2 rounded-lg flex items-center space-x-2 border border-marketplace-border"
           >
             <Download className="w-5 h-5" />
             <span>Export</span>
           </button>
           <button
-            onClick={() => setShowUploadModal(true)}
+            onClick={() => {
+              setShowUploadModal(true);
+              resetUploadModal();
+            }}
             className="bg-primary hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           >
             <Upload className="w-5 h-5" />
@@ -214,50 +391,50 @@ export default function VouchersPage() {
 
       {/* Overall Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Total Vouchers</p>
-          <p className="text-2xl font-bold text-white">{stats.total}</p>
+        <div className="bg-marketplace-card rounded-lg p-4">
+          <p className="text-marketplace-text-muted text-sm">Total Vouchers</p>
+          <p className="text-2xl font-bold text-marketplace-text">{stats.total}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Available</p>
+        <div className="bg-marketplace-card rounded-lg p-4">
+          <p className="text-marketplace-text-muted text-sm">Available</p>
           <p className="text-2xl font-bold text-green-500">{stats.available}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Sold</p>
+        <div className="bg-marketplace-card rounded-lg p-4">
+          <p className="text-marketplace-text-muted text-sm">Sold</p>
           <p className="text-2xl font-bold text-blue-500">{stats.sold}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Used</p>
-          <p className="text-2xl font-bold text-gray-500">{stats.used}</p>
+        <div className="bg-marketplace-card rounded-lg p-4">
+          <p className="text-marketplace-text-muted text-sm">Used</p>
+          <p className="text-2xl font-bold text-marketplace-text-muted">{stats.used}</p>
         </div>
       </div>
 
       {/* Voucher Status by Plan */}
       {statsByPlan.length > 0 && (
-        <div className="bg-gray-800 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">Voucher Status by Package</h2>
+        <div className="bg-marketplace-card rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-bold text-marketplace-text mb-4">Voucher Status by Package</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Package</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Total</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Available</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Sold</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Used</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-300">Price</th>
+                <tr className="border-b border-marketplace-border">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-marketplace-text-muted">Package</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-marketplace-text-muted">Total</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-marketplace-text-muted">Available</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-marketplace-text-muted">Sold</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-marketplace-text-muted">Used</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-marketplace-text-muted">Price</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody className="divide-y divide-marketplace-border">
                 {statsByPlan.map((stat) => (
-                  <tr key={stat.plan.id} className="hover:bg-gray-700/30">
+                  <tr key={stat.plan.id} className="hover:bg-marketplace-hover">
                     <td className="py-3 px-4">
                       <div>
-                        <p className="text-white font-medium">{stat.plan.name}</p>
-                        <p className="text-gray-400 text-sm">{stat.plan.data_limit} • {stat.plan.duration}</p>
+                        <p className="text-marketplace-text font-medium">{stat.plan.name}</p>
+                        <p className="text-marketplace-text-muted text-sm">{stat.plan.data_limit} • {stat.plan.duration}</p>
                       </div>
                     </td>
-                    <td className="text-center py-3 px-4 text-white font-semibold">{stat.total}</td>
+                    <td className="text-center py-3 px-4 text-marketplace-text font-semibold">{stat.total}</td>
                     <td className="text-center py-3 px-4">
                       <span className="text-green-500 font-semibold">{stat.available}</span>
                     </td>
@@ -265,9 +442,9 @@ export default function VouchersPage() {
                       <span className="text-blue-500 font-semibold">{stat.sold}</span>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className="text-gray-500 font-semibold">{stat.used}</span>
+                      <span className="text-marketplace-text-muted font-semibold">{stat.used}</span>
                     </td>
-                    <td className="text-right py-3 px-4 text-white font-medium">KSh {stat.plan.price}</td>
+                    <td className="text-right py-3 px-4 text-marketplace-text font-medium">KSh {stat.plan.price}</td>
                   </tr>
                 ))}
               </tbody>
@@ -422,10 +599,22 @@ export default function VouchersPage() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl p-6 max-w-2xl w-full">
-            <h2 className="text-2xl font-bold text-white mb-4">Upload Vouchers</h2>
+          <div className="bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Upload Vouchers</h2>
+              <button
+                onClick={() => {
+                  setShowUploadModal(false);
+                  resetUploadModal();
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Plan Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Select Plan
@@ -444,33 +633,269 @@ export default function VouchersPage() {
                 </select>
               </div>
 
+              {/* Upload Mode Toggle */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Voucher Codes (one per line)
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Upload Method
                 </label>
-                <textarea
-                  value={voucherCodes}
-                  onChange={(e) => setVoucherCodes(e.target.value)}
-                  rows={10}
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
-                  placeholder="ABC123&#10;DEF456&#10;GHI789"
-                />
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => {
+                      setUploadMode('text');
+                      resetUploadModal();
+                    }}
+                    className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                      uploadMode === 'text'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Text Input</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUploadMode('csv');
+                      setVoucherCodes('');
+                    }}
+                    className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                      uploadMode === 'csv'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>CSV Upload</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Text Input Mode */}
+              {uploadMode === 'text' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Voucher Codes (one per line)
+                  </label>
+                  <textarea
+                    value={voucherCodes}
+                    onChange={(e) => setVoucherCodes(e.target.value)}
+                    rows={10}
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+                    placeholder="ABC123&#10;DEF456&#10;GHI789"
+                  />
+                </div>
+              )}
+
+              {/* CSV Upload Mode */}
+              {uploadMode === 'csv' && (
+                <div className="space-y-4">
+                  {!csvFile ? (
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                        isDragOver
+                          ? 'border-primary bg-primary/10'
+                          : 'border-gray-600 hover:border-gray-500'
+                      }`}
+                    >
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-white font-medium mb-2">
+                        Drop your CSV file here or click to browse
+                      </p>
+                      <p className="text-gray-400 text-sm mb-4">
+                        Supports CSV files with voucher codes in any column
+                      </p>
+                      <input
+                        type="file"
+                        accept=".csv,text/csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setCsvFile(file);
+                            handleCSVUpload(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="csv-upload"
+                      />
+                      <label
+                        htmlFor="csv-upload"
+                        className="bg-primary hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer inline-block"
+                      >
+                        Choose CSV File
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* File Info */}
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <FileText className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="text-white font-medium">{csvFile.name}</p>
+                              <p className="text-gray-400 text-sm">
+                                {csvData.length > 0 ? `${csvData.length - 1} rows` : 'Processing...'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setCsvFile(null);
+                              setCsvData([]);
+                              setCsvPreview([]);
+                            }}
+                            className="text-gray-400 hover:text-white"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Column Selection */}
+                      {csvPreview.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Select Column with Voucher Codes
+                          </label>
+                          <select
+                            value={selectedColumn}
+                            onChange={(e) => setSelectedColumn(parseInt(e.target.value))}
+                            className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-4"
+                          >
+                            {csvPreview[0]?.map((header, index) => (
+                              <option key={index} value={index}>
+                                Column {index + 1}: {header || `Column ${index + 1}`}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* CSV Preview */}
+                          <div className="bg-gray-900 rounded-lg p-4">
+                            <h4 className="text-white font-medium mb-3">Preview (first 5 rows)</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-gray-700">
+                                    {csvPreview[0]?.map((header, index) => (
+                                      <th
+                                        key={index}
+                                        className={`px-3 py-2 text-left font-medium ${
+                                          index === selectedColumn
+                                            ? 'text-primary bg-primary/10'
+                                            : 'text-gray-300'
+                                        }`}
+                                      >
+                                        {header || `Column ${index + 1}`}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {csvPreview.slice(1).map((row, rowIndex) => (
+                                    <tr key={rowIndex} className="border-b border-gray-800">
+                                      {row.map((cell, cellIndex) => (
+                                        <td
+                                          key={cellIndex}
+                                          className={`px-3 py-2 ${
+                                            cellIndex === selectedColumn
+                                              ? 'text-primary bg-primary/5 font-mono'
+                                              : 'text-gray-400'
+                                          }`}
+                                        >
+                                          {cell}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                            <p className="text-gray-400 text-xs mt-2">
+                              Selected column will be used for voucher codes
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Upload Progress */}
+              {uploading && (
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white font-medium">Upload Progress</span>
+                    <span className="text-gray-300 text-sm">
+                      {uploadProgress.processed} / {uploadProgress.total}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-600 rounded-full h-2 mb-3">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${uploadProgress.total > 0 ? (uploadProgress.processed / uploadProgress.total) * 100 : 0}%`
+                      }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-400 flex items-center">
+                      <Check className="w-4 h-4 mr-1" />
+                      {uploadProgress.successful} successful
+                    </span>
+                    {uploadProgress.failed > 0 && (
+                      <span className="text-red-400 flex items-center">
+                        <X className="w-4 h-4 mr-1" />
+                        {uploadProgress.failed} failed
+                      </span>
+                    )}
+                  </div>
+                  {uploadProgress.errors.length > 0 && (
+                    <div className="mt-3 p-2 bg-red-900/20 rounded border border-red-800">
+                      <p className="text-red-400 text-xs font-medium mb-1">Errors:</p>
+                      {uploadProgress.errors.slice(0, 3).map((error, index) => (
+                        <p key={index} className="text-red-300 text-xs">{error}</p>
+                      ))}
+                      {uploadProgress.errors.length > 3 && (
+                        <p className="text-red-400 text-xs">...and {uploadProgress.errors.length - 3} more</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
+            {/* Modal Actions */}
             <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={() => setShowUploadModal(false)}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  resetUploadModal();
+                }}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                disabled={uploading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUploadVouchers}
-                disabled={uploading}
-                className="px-4 py-2 bg-primary hover:bg-green-600 text-white rounded-lg disabled:opacity-50"
+                disabled={uploading || !selectedPlan || (uploadMode === 'text' && !voucherCodes.trim()) || (uploadMode === 'csv' && csvData.length === 0)}
+                className="px-4 py-2 bg-primary hover:bg-green-600 text-white rounded-lg disabled:opacity-50 flex items-center space-x-2"
               >
-                {uploading ? 'Uploading...' : 'Upload'}
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Vouchers</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

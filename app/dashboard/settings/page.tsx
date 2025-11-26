@@ -155,14 +155,14 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-        <p className="text-gray-400">Manage your account and portal settings</p>
+        <h1 className="text-3xl font-bold text-marketplace-text mb-2">Settings</h1>
+        <p className="text-marketplace-text-muted">Manage your account and portal settings</p>
       </div>
 
       <div className="max-w-2xl">
         {/* Business Information */}
-        <div className="bg-gray-800 rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">Business Information</h2>
+        <div className="bg-marketplace-card rounded-xl p-6 mb-6 border border-marketplace-border">
+          <h2 className="text-xl font-bold text-marketplace-text mb-4">Business Information</h2>
 
           <div className="space-y-4">
             <div>

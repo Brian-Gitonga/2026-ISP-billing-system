@@ -208,13 +208,13 @@ export default function EarningsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Earnings</h1>
-          <p className="text-gray-400">Track your voucher sales earnings and payouts</p>
+          <h1 className="text-3xl font-bold text-marketplace-text mb-2">Earnings</h1>
+          <p className="text-marketplace-text-muted">Track your voucher sales earnings and payouts</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={exportTransactions}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+            className="bg-marketplace-card hover:bg-marketplace-hover text-marketplace-text px-4 py-2 rounded-lg flex items-center space-x-2 border border-marketplace-border"
           >
             <Download className="w-5 h-5" />
             <span>Export</span>
@@ -232,61 +232,61 @@ export default function EarningsPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Pending Earnings */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-yellow-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-yellow-500 border border-marketplace-border">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-yellow-500/10 p-3 rounded-lg">
               <Clock className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">PENDING EARNINGS</h3>
-          <p className="text-3xl font-bold text-white">
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">PENDING EARNINGS</h3>
+          <p className="text-3xl font-bold text-marketplace-text">
             KSh {stats.pendingEarnings.toLocaleString()}
           </p>
-          <p className="text-sm text-gray-400 mt-2">
+          <p className="text-sm text-marketplace-text-muted mt-2">
             {stats.pendingTransactions} transactions
           </p>
         </div>
 
         {/* Total Earnings */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-green-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-green-500 border border-marketplace-border">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-green-500/10 p-3 rounded-lg">
               <DollarSign className="w-6 h-6 text-green-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">TOTAL EARNINGS</h3>
-          <p className="text-3xl font-bold text-white">
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">TOTAL EARNINGS</h3>
+          <p className="text-3xl font-bold text-marketplace-text">
             KSh {stats.totalEarnings.toLocaleString()}
           </p>
-          <p className="text-sm text-gray-400 mt-2">All time</p>
+          <p className="text-sm text-marketplace-text-muted mt-2">All time</p>
         </div>
 
         {/* Platform Commission */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-blue-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-blue-500 border border-marketplace-border">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-blue-500/10 p-3 rounded-lg">
               <TrendingUp className="w-6 h-6 text-blue-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">PLATFORM COMMISSION</h3>
-          <p className="text-3xl font-bold text-white">
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">PLATFORM COMMISSION</h3>
+          <p className="text-3xl font-bold text-marketplace-text">
             KSh {stats.totalCommission.toLocaleString()}
           </p>
-          <p className="text-sm text-gray-400 mt-2">Total deducted</p>
+          <p className="text-sm text-marketplace-text-muted mt-2">Total deducted</p>
         </div>
 
         {/* Next Payout */}
-        <div className="bg-gray-800 rounded-xl p-6 border-t-4 border-purple-500">
+        <div className="bg-marketplace-card rounded-xl p-6 border-t-4 border-purple-500 border border-marketplace-border">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-purple-500/10 p-3 rounded-lg">
               <Calendar className="w-6 h-6 text-purple-500" />
             </div>
           </div>
-          <h3 className="text-gray-400 text-sm font-medium mb-1">NEXT PAYOUT</h3>
-          <p className="text-xl font-bold text-white">
+          <h3 className="text-marketplace-text-muted text-sm font-medium mb-1">NEXT PAYOUT</h3>
+          <p className="text-xl font-bold text-marketplace-text">
             {stats.nextPayoutDate}
           </p>
-          <p className="text-sm text-gray-400 mt-2">If minimum reached</p>
+          <p className="text-sm text-marketplace-text-muted mt-2">If minimum reached</p>
         </div>
       </div>
 
@@ -297,7 +297,7 @@ export default function EarningsPage() {
           className={`px-4 py-2 rounded-lg font-medium transition ${
             activeTab === 'pending'
               ? 'bg-primary text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              : 'bg-marketplace-card text-marketplace-text-muted hover:bg-marketplace-hover border border-marketplace-border'
           }`}
         >
           Pending Earnings
@@ -307,7 +307,7 @@ export default function EarningsPage() {
           className={`px-4 py-2 rounded-lg font-medium transition ${
             activeTab === 'history'
               ? 'bg-primary text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              : 'bg-marketplace-card text-marketplace-text-muted hover:bg-marketplace-hover border border-marketplace-border'
           }`}
         >
           Payout History
@@ -316,12 +316,12 @@ export default function EarningsPage() {
 
       {/* Content based on active tab */}
       {activeTab === 'pending' ? (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="p-6 border-b border-gray-700">
+        <div className="bg-marketplace-card rounded-xl overflow-hidden border border-marketplace-border">
+          <div className="p-6 border-b border-marketplace-border">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">Next Payout Period</h2>
-                <p className="text-gray-400 text-sm">
+                <h2 className="text-xl font-bold text-marketplace-text">Next Payout Period</h2>
+                <p className="text-marketplace-text-muted text-sm">
                   Earnings to be paid on {stats.nextPayoutDate}
                 </p>
               </div>
@@ -333,7 +333,7 @@ export default function EarningsPage() {
                 }`}>
                   {stats.thresholdMet ? 'Threshold Met' : 'Threshold Not Met'}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-marketplace-text-muted mt-1">
                   Minimum: KSh {stats.minimumPayout?.toLocaleString()}
                 </p>
               </div>
@@ -343,21 +343,21 @@ export default function EarningsPage() {
           {/* Payout Summary Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-700">
+              <thead className="bg-marketplace-sidebar">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Payout Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Total Pending</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Commission</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Your Earnings</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Payout Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Total Pending</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Commission</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Your Earnings</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
-                <tr className="hover:bg-gray-700/50">
-                  <td className="px-6 py-4 text-sm text-gray-300">
+              <tbody className="divide-y divide-marketplace-border">
+                <tr className="hover:bg-marketplace-hover">
+                  <td className="px-6 py-4 text-sm text-marketplace-text-muted">
                     {stats.nextPayoutDate}
                   </td>
-                  <td className="px-6 py-4 text-sm text-white font-semibold">
+                  <td className="px-6 py-4 text-sm text-marketplace-text font-semibold">
                     KSh {((stats.nextPayoutEarnings || 0) + (stats.nextPayoutCommission || 0)).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-sm text-red-400">
@@ -382,22 +382,22 @@ export default function EarningsPage() {
 
           {/* Transaction Details */}
           {transactions.length > 0 && (
-            <div className="p-6 border-t border-gray-700">
-              <h3 className="text-lg font-semibold text-white mb-4">Transaction Details</h3>
+            <div className="p-6 border-t border-marketplace-border">
+              <h3 className="text-lg font-semibold text-marketplace-text mb-4">Transaction Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400">Total Transactions</p>
-                  <p className="text-2xl font-bold text-white">{transactions.length}</p>
+                <div className="bg-marketplace-sidebar rounded-lg p-4 border border-marketplace-border">
+                  <p className="text-sm text-marketplace-text-muted">Total Transactions</p>
+                  <p className="text-2xl font-bold text-marketplace-text">{transactions.length}</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400">Average per Transaction</p>
-                  <p className="text-2xl font-bold text-white">
+                <div className="bg-marketplace-sidebar rounded-lg p-4 border border-marketplace-border">
+                  <p className="text-sm text-marketplace-text-muted">Average per Transaction</p>
+                  <p className="text-2xl font-bold text-marketplace-text">
                     KSh {transactions.length > 0 ? Math.round((stats.nextPayoutEarnings || 0) / transactions.length).toLocaleString() : 0}
                   </p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <p className="text-sm text-gray-400">Commission Rate</p>
-                  <p className="text-2xl font-bold text-white">8%</p>
+                <div className="bg-marketplace-sidebar rounded-lg p-4 border border-marketplace-border">
+                  <p className="text-sm text-marketplace-text-muted">Commission Rate</p>
+                  <p className="text-2xl font-bold text-marketplace-text">8%</p>
                 </div>
               </div>
             </div>
@@ -405,18 +405,18 @@ export default function EarningsPage() {
 
           {transactions.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-400">No transactions in current payout period</p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-marketplace-text-muted">No transactions in current payout period</p>
+              <p className="text-sm text-marketplace-text-muted mt-2">
                 Transactions will appear here as you make sales
               </p>
             </div>
           )}
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="p-6 border-b border-gray-700">
-            <h2 className="text-xl font-bold text-white">Payout History</h2>
-            <p className="text-gray-400 text-sm">
+        <div className="bg-marketplace-card rounded-xl overflow-hidden border border-marketplace-border">
+          <div className="p-6 border-b border-marketplace-border">
+            <h2 className="text-xl font-bold text-marketplace-text">Payout History</h2>
+            <p className="text-marketplace-text-muted text-sm">
               Previous payments received
             </p>
           </div>
@@ -424,24 +424,24 @@ export default function EarningsPage() {
           {payouts.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-700">
+                <thead className="bg-marketplace-sidebar">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Period</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Transactions</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Gross Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Commission</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Net Paid</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Period</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Transactions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Gross Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Commission</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Net Paid</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-marketplace-text-muted uppercase">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-marketplace-border">
                   {payouts.map((payout) => (
-                    <tr key={payout.id} className="hover:bg-gray-700/50">
-                      <td className="px-6 py-4 text-sm text-gray-300">
+                    <tr key={payout.id} className="hover:bg-marketplace-hover">
+                      <td className="px-6 py-4 text-sm text-marketplace-text-muted">
                         {new Date(payout.period_start).toLocaleDateString()} - {new Date(payout.period_end).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-white">{payout.total_transactions}</td>
-                      <td className="px-6 py-4 text-sm text-white">KSh {payout.gross_amount}</td>
+                      <td className="px-6 py-4 text-sm text-marketplace-text">{payout.total_transactions}</td>
+                      <td className="px-6 py-4 text-sm text-marketplace-text">KSh {payout.gross_amount}</td>
                       <td className="px-6 py-4 text-sm text-red-400">-KSh {payout.commission_amount}</td>
                       <td className="px-6 py-4 text-sm text-green-400 font-semibold">KSh {payout.net_amount}</td>
                       <td className="px-6 py-4 text-sm">
@@ -462,7 +462,7 @@ export default function EarningsPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-400">No payout history yet</p>
+              <p className="text-marketplace-text-muted">No payout history yet</p>
             </div>
           )}
         </div>

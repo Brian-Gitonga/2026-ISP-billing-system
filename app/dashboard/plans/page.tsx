@@ -145,8 +145,8 @@ export default function PlansPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Plans & Packages</h1>
-          <p className="text-gray-400">Manage your WiFi plans</p>
+          <h1 className="text-3xl font-bold text-marketplace-text mb-2">Plans & Packages</h1>
+          <p className="text-marketplace-text-muted">Manage your WiFi plans</p>
         </div>
         <button
           onClick={() => {
@@ -165,20 +165,20 @@ export default function PlansPage() {
         {plans.map((plan) => (
           <div
             key={plan.id}
-            className={`bg-gray-800 rounded-xl p-6 border-2 ${
-              plan.is_active ? 'border-primary' : 'border-gray-700'
+            className={`bg-marketplace-card rounded-xl p-6 border-2 ${
+              plan.is_active ? 'border-primary' : 'border-marketplace-border'
             }`}
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-marketplace-text">{plan.name}</h3>
                 <span className="inline-block mt-2 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-full uppercase">
                   {plan.duration}
                 </span>
               </div>
               <button
                 onClick={() => toggleActive(plan)}
-                className="text-gray-400 hover:text-white"
+                className="text-marketplace-text-muted hover:text-marketplace-text"
               >
                 {plan.is_active ? (
                   <ToggleRight className="w-8 h-8 text-primary" />
@@ -188,23 +188,23 @@ export default function PlansPage() {
               </button>
             </div>
 
-            <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
+            <p className="text-marketplace-text-muted text-sm mb-4">{plan.description}</p>
 
             <div className="space-y-2 mb-4">
               {plan.data_limit && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-500">Data:</span> {plan.data_limit}
+                <p className="text-marketplace-text text-sm">
+                  <span className="text-marketplace-text-muted">Data:</span> {plan.data_limit}
                 </p>
               )}
               {plan.speed && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-500">Speed:</span> {plan.speed}
+                <p className="text-marketplace-text text-sm">
+                  <span className="text-marketplace-text-muted">Speed:</span> {plan.speed}
                 </p>
               )}
             </div>
 
-            <div className="border-t border-gray-700 pt-4 mb-4">
-              <p className="text-3xl font-bold text-white">KSh {plan.price}</p>
+            <div className="border-t border-marketplace-border pt-4 mb-4">
+              <p className="text-3xl font-bold text-marketplace-text">KSh {plan.price}</p>
             </div>
 
             <div className="flex space-x-2">
@@ -229,7 +229,7 @@ export default function PlansPage() {
 
       {plans.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400 mb-4">No plans created yet</p>
+          <p className="text-marketplace-text-muted mb-4">No plans created yet</p>
           <button
             onClick={() => setShowModal(true)}
             className="bg-primary hover:bg-green-600 text-white px-6 py-3 rounded-lg"
@@ -242,14 +242,14 @@ export default function PlansPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-marketplace-card rounded-xl p-6 max-w-md w-full border border-marketplace-border">
+            <h2 className="text-2xl font-bold text-marketplace-text mb-4">
               {editingPlan ? 'Edit Plan' : 'Create New Plan'}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-marketplace-text-muted mb-2">
                   Plan Name
                 </label>
                 <input
@@ -257,45 +257,45 @@ export default function PlansPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                   placeholder="e.g., Basic Daily"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-marketplace-text-muted mb-2">
                   Description
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={2}
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                   placeholder="Plan description"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-marketplace-text-muted mb-2">
                     Data Limit
                   </label>
                   <input
                     type="text"
                     value={formData.data_limit}
                     onChange={(e) => setFormData({ ...formData, data_limit: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                     placeholder="e.g., 1GB"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Speed</label>
+                  <label className="block text-sm font-medium text-marketplace-text-muted mb-2">Speed</label>
                   <input
                     type="text"
                     value={formData.speed}
                     onChange={(e) => setFormData({ ...formData, speed: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                     placeholder="e.g., 5Mbps"
                   />
                 </div>
@@ -303,7 +303,7 @@ export default function PlansPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Price (KSh)</label>
+                  <label className="block text-sm font-medium text-marketplace-text-muted mb-2">Price (KSh)</label>
                   <input
                     type="number"
                     value={formData.price}
@@ -311,13 +311,13 @@ export default function PlansPage() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                     placeholder="99"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-marketplace-text-muted mb-2">
                     Duration
                   </label>
                   <select
@@ -328,7 +328,7 @@ export default function PlansPage() {
                         duration: e.target.value as 'daily' | 'weekly' | 'monthly',
                       })
                     }
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 bg-marketplace-sidebar text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
                   >
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -344,7 +344,7 @@ export default function PlansPage() {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                  className="px-4 py-2 bg-marketplace-sidebar hover:bg-marketplace-hover text-marketplace-text rounded-lg border border-marketplace-border"
                 >
                   Cancel
                 </button>

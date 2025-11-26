@@ -19,6 +19,7 @@ import {
   User,
   DollarSign,
 } from 'lucide-react';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -78,20 +79,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-marketplace-bg">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-marketplace-sidebar transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <div className="flex items-center justify-between p-6 border-b border-marketplace-border">
             <h1 className="text-2xl font-bold text-primary">QTRO ISP</h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="lg:hidden text-marketplace-text-muted hover:text-marketplace-text"
             >
               <X className="w-6 h-6" />
             </button>
@@ -99,7 +100,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Main Menu */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <div className="text-xs font-semibold text-gray-400 uppercase mb-3">Main</div>
+            <div className="text-xs font-semibold text-marketplace-text-muted uppercase mb-3">Main</div>
             {menuItems.slice(0, 3).map((item) => (
               <Link
                 key={item.href}
@@ -107,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition ${
                   pathname === item.href
                     ? 'bg-primary text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
+                    : 'text-marketplace-text-muted hover:bg-marketplace-hover hover:text-marketplace-text'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -115,7 +116,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             ))}
 
-            <div className="text-xs font-semibold text-gray-400 uppercase mb-3 mt-6">
+            <div className="text-xs font-semibold text-marketplace-text-muted uppercase mb-3 mt-6">
               Management
             </div>
             {menuItems.slice(3, 6).map((item) => (
@@ -125,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition ${
                   pathname === item.href
                     ? 'bg-primary text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
+                    : 'text-marketplace-text-muted hover:bg-marketplace-hover hover:text-marketplace-text'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -133,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             ))}
 
-            <div className="text-xs font-semibold text-gray-400 uppercase mb-3 mt-6">
+            <div className="text-xs font-semibold text-marketplace-text-muted uppercase mb-3 mt-6">
               Settings
             </div>
             {menuItems.slice(6).map((item) => (
@@ -143,7 +144,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition ${
                   pathname === item.href
                     ? 'bg-primary text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
+                    : 'text-marketplace-text-muted hover:bg-marketplace-hover hover:text-marketplace-text'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -157,11 +158,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Bar */}
-        <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
+        <header className="bg-marketplace-sidebar border-b border-marketplace-border sticky top-0 z-40">
           <div className="flex items-center justify-between px-6 py-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="lg:hidden text-marketplace-text-muted hover:text-marketplace-text"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -170,33 +171,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <input
                 type="search"
                 placeholder="Search customers, plans, tickets..."
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-2 bg-marketplace-card text-marketplace-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-marketplace-border"
               />
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="relative text-gray-400 hover:text-white">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
+              <button className="relative text-marketplace-text-muted hover:text-marketplace-text">
                 <Bell className="w-6 h-6" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-xs flex items-center justify-center text-white">
                   {profile?.unread_notifications || 0}
                 </span>
               </button>
 
-              <button className="text-gray-400 hover:text-white">
+              <button className="text-marketplace-text-muted hover:text-marketplace-text">
                 <User className="w-6 h-6" />
               </button>
 
               <div className="text-right">
-                <p className="text-sm text-white font-medium">
+                <p className="text-sm text-marketplace-text font-medium">
                   {profile?.business_name || user?.email}
                 </p>
               </div>
 
-
-
               <button
                 onClick={handleLogout}
-                className="text-gray-400 hover:text-white"
+                className="text-marketplace-text-muted hover:text-marketplace-text"
                 title="Logout"
               >
                 <LogOut className="w-5 h-5" />

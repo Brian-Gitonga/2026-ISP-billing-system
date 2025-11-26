@@ -2,63 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force light mode and prevent dark mode issues */
-* {
-  color-scheme: light !important;
+:root {
+  /* Light Theme Colors */
+  --color-primary: #10b981;
+  --color-secondary: #f59e0b;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-surface-secondary: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --color-hover: #f3f4f6;
+
+  /* Light theme marketplace colors */
+  --marketplace-bg: #ffffff;
+  --marketplace-sidebar: #f8fafc;
+  --marketplace-card: #ffffff;
+  --marketplace-border: #e2e8f0;
+  --marketplace-text: #1e293b;
+  --marketplace-text-muted: #64748b;
+  --marketplace-hover: #f1f5f9;
 }
 
-html, body {
-  background-color: white !important;
-  color: #121212 !important;
+.dark {
+  /* New Dark Theme Colors - Your Marketplace Theme */
+  --color-background: #0a0a0a;      /* Almost black background */
+  --color-surface: #141414;         /* Dark gray sidebar */
+  --color-surface-secondary: #1a1a1a; /* Dark card background */
+  --color-border: #2a2a2a;          /* Subtle border gray */
+  --color-text-primary: #ffffff;    /* Pure white text */
+  --color-text-secondary: #cccccc;  /* Light gray for secondary text */
+  --color-text-muted: #999999;      /* Medium gray for muted text */
+  --color-hover: #252525;           /* Slightly lighter gray for hover */
+
+  /* Dark theme marketplace colors */
+  --marketplace-bg: #0a0a0a;
+  --marketplace-sidebar: #141414;
+  --marketplace-card: #1a1a1a;
+  --marketplace-border: #2a2a2a;
+  --marketplace-text: #ffffff;
+  --marketplace-text-muted: #999999;
+  --marketplace-hover: #252525;
 }
 
-/* Ensure all elements are visible */
-* {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* Base styles */
+html {
+  color-scheme: light dark;
 }
 
-/* Ensure inputs are always visible */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Form elements styling */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="tel"],
 input[type="number"],
+input[type="search"],
 textarea,
 select {
-  color: #121212 !important;
-  background-color: white !important;
-  border: 1px solid #d1d5db !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
 }
 
-input[type="text"]::placeholder,
-input[type="email"]::placeholder,
-input[type="password"]::placeholder,
-input[type="tel"]::placeholder,
-input[type="number"]::placeholder,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+input::placeholder,
 textarea::placeholder {
-  color: #9ca3af !important;
+  color: var(--color-text-muted);
 }
 
-/* Ensure labels are visible */
-label {
-  color: #374151 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Ensure buttons are visible */
+/* Button base styles */
 button {
-  opacity: 1 !important;
-  visibility: visible !important;
+  transition: all 0.3s ease;
 }
 
-/* Ensure divs and containers are visible */
-div {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* Scrollbar styling for dark theme */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-hover);
 }
 
 @layer utilities {

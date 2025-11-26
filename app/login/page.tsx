@@ -77,23 +77,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+      <div className="max-w-md w-full bg-black rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="bg-white rounded-full p-2 shadow-lg">
               <Image
                 src="/favicon.png"
-                alt="Qtro WiFi Logo"
+                alt="Qtro ISP Logo"
                 width={48}
                 height={48}
                 className="rounded-full"
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Qtro WiFi
+          <h1 className="text-3xl font-bold text-white">
+            Qtro ISP
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-white mt-2">
             Sign in to your account
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
               Email Address
             </label>
             <input
@@ -128,7 +128,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
               Password
             </label>
             <input
@@ -152,7 +152,7 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-600">
+          <p className="text-white">
             Don't have an account?{' '}
             <Link href="/signup" className="text-primary hover:text-green-600 font-semibold">
               Sign up
