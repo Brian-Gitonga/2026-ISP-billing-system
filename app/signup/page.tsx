@@ -69,11 +69,11 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 px-4 py-8 bg-black">
-      <div className="max-w-md w-full bg-black rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 px-4 py-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-black rounded-full p-2 shadow-lg">
+            <div className="bg-white rounded-full p-2 shadow-lg">
               <Image
                 src="/favicon.png"
                 alt="Qtro ISP Logo"
@@ -83,19 +83,19 @@ export default function SignupPage() {
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white">Qtro ISP</h1>
-          <p className="text-white mt-2">Create your account</p>
+          <h1 className="text-3xl font-bold text-slate-800">Create Account</h1>
+          <p className="text-slate-600 mt-2">Join us and start managing your WiFi business</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
-            <label htmlFor="businessName" className="block text-sm font-medium text-white mb-2">
+            <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 mb-2">
               Business Name
             </label>
             <input
@@ -104,13 +104,13 @@ export default function SignupPage() {
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 placeholder-slate-400"
               placeholder="Your Business Name"
             />
           </div>
 
           <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-white mb-2">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-slate-700 mb-2">
               Phone Number
             </label>
             <input
@@ -119,13 +119,13 @@ export default function SignupPage() {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 placeholder-slate-400"
               placeholder="0712345678"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
               Email Address
             </label>
             <input
@@ -134,13 +134,13 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 placeholder-slate-400"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
               Password
             </label>
             <input
@@ -150,24 +150,25 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 placeholder-slate-400"
               placeholder="••••••••"
             />
+            <p className="text-xs text-slate-500 mt-1">Minimum 6 characters</p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-white">
+        <div className="mt-8 text-center">
+          <p className="text-slate-600">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:text-green-600 font-semibold">
+            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-semibold transition">
               Sign in
             </Link>
           </p>

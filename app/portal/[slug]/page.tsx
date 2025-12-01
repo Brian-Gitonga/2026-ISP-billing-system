@@ -443,7 +443,8 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="0712345678"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white text-gray-900"
+                style={{ backgroundColor: '#ffffff', color: '#111827' }}
               />
             </div>
             <button
@@ -511,7 +512,8 @@ export default function PortalPage({ params }: { params: Promise<{ slug: string 
                 value={voucherPhoneNumber}
                 onChange={(e) => setVoucherPhoneNumber(e.target.value)}
                 placeholder="0712345678"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white text-gray-900"
+                style={{ backgroundColor: '#ffffff', color: '#111827' }}
               />
             </div>
 
