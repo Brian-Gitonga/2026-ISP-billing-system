@@ -52,6 +52,24 @@ export async function POST(request: NextRequest) {
       const items = CallbackMetadata.CallbackMetadataItem || CallbackMetadata.Item;
       const mpesaReceiptNumber = items?.find((item: any) => item.Name === 'MpesaReceiptNumber')?.Value;
 
+      // IMPORTANT: Check if a voucher was already assigned by status polling (race condition fix)
+      if (transaction.voucher_id) {
+        console.log('🔄 Voucher already assigned by status polling, just updating receipt number...');
+
+        // Just update the receipt number and ensure status is completed
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            status: 'completed',
+            mpesa_receipt_number: mpesaReceiptNumber,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.id);
+
+        console.log('✅ Transaction updated with M-Pesa receipt:', mpesaReceiptNumber);
+        return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success - voucher already assigned' });
+      }
+
       // Find an available voucher for this plan
       const { data: availableVoucher, error: voucherError } = await supabaseAdmin
         .from('vouchers')
@@ -65,7 +83,29 @@ export async function POST(request: NextRequest) {
       if (voucherError || !availableVoucher) {
         console.error('No available voucher found for plan:', transaction.plan_id);
 
-        // Update transaction as completed but without voucher
+        // Double-check: maybe voucher was assigned but we have stale data
+        // Re-fetch the transaction to get the latest state
+        const { data: latestTransaction } = await supabaseAdmin
+          .from('transactions')
+          .select('voucher_id')
+          .eq('id', transaction.id)
+          .single();
+
+        if (latestTransaction?.voucher_id) {
+          console.log('🔄 Voucher was assigned during our processing, updating receipt...');
+          await supabaseAdmin
+            .from('transactions')
+            .update({
+              status: 'completed',
+              mpesa_receipt_number: mpesaReceiptNumber,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', transaction.id);
+
+          return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success - voucher assigned concurrently' });
+        }
+
+        // Truly no voucher available - mark as failed but with receipt
         await supabaseAdmin
           .from('transactions')
           .update({
@@ -120,16 +160,20 @@ export async function POST(request: NextRequest) {
       console.log('🎉 Payment successful! Voucher assigned:', availableVoucher.voucher_code);
       console.log('💰 Commission details:', { commissionRate, commissionAmount, netAmount });
     } else {
-      // Payment failed
-      await supabaseAdmin
-        .from('transactions')
-        .update({
-          status: 'failed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', transaction.id);
+      // Payment failed - but only update if there's no voucher assigned (race condition check)
+      if (!transaction.voucher_id) {
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            status: 'failed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.id);
 
-      console.log('❌ Payment failed. ResultCode:', ResultCode, 'ResultDesc:', ResultDesc);
+        console.log('❌ Payment failed. ResultCode:', ResultCode, 'ResultDesc:', ResultDesc);
+      } else {
+        console.log('⚠️ Callback indicates failure but voucher already assigned, keeping completed status');
+      }
     }
 
     return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success' });

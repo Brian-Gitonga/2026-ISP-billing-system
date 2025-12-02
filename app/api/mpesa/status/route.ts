@@ -28,10 +28,61 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
     }
 
-    // If transaction is already completed or failed, return the stored status
-    if (transaction.status === 'completed' || transaction.status === 'failed') {
+    // If transaction is already completed, return the stored status
+    if (transaction.status === 'completed') {
       return NextResponse.json({
-        status: transaction.status,
+        status: 'completed',
+        mpesaReceiptNumber: transaction.mpesa_receipt_number,
+        voucher: transaction.voucher,
+      });
+    }
+
+    // IMPORTANT: Handle race condition where transaction is marked as "failed"
+    // but voucher was actually assigned (can happen due to callback/polling race)
+    if (transaction.status === 'failed') {
+      // Check if there's actually an M-Pesa receipt and voucher assigned
+      if (transaction.mpesa_receipt_number && transaction.voucher_id) {
+        console.log('🔄 Transaction marked as failed but has receipt and voucher, fixing status...');
+
+        // Fix the transaction status
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            status: 'completed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.id);
+
+        return NextResponse.json({
+          status: 'completed',
+          mpesaReceiptNumber: transaction.mpesa_receipt_number,
+          voucher: transaction.voucher,
+        });
+      }
+
+      // Check if voucher was assigned but transaction status not updated
+      if (transaction.voucher_id && transaction.voucher) {
+        console.log('🔄 Transaction marked as failed but has voucher, fixing status...');
+
+        // Fix the transaction status
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            status: 'completed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.id);
+
+        return NextResponse.json({
+          status: 'completed',
+          mpesaReceiptNumber: transaction.mpesa_receipt_number,
+          voucher: transaction.voucher,
+        });
+      }
+
+      // It's truly failed - no receipt and no voucher
+      return NextResponse.json({
+        status: 'failed',
         mpesaReceiptNumber: transaction.mpesa_receipt_number,
         voucher: transaction.voucher,
       });
