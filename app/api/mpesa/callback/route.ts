@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { assignVoucherAtomically } from '@/lib/voucher-assignment';
 
 // Test endpoint to verify callback URL is reachable
 export async function GET() {
@@ -70,21 +71,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ResultCode: 0, ResultDesc: 'Success - voucher already assigned' });
       }
 
-      // Find an available voucher for this plan
-      const { data: availableVoucher, error: voucherError } = await supabaseAdmin
-        .from('vouchers')
-        .select('*')
-        .eq('plan_id', transaction.plan_id)
-        .eq('user_id', transaction.user_id)
-        .eq('status', 'available')
-        .limit(1)
-        .single();
+      // Use atomic voucher assignment to prevent race conditions
+      console.log(`💳 Callback: Payment successful for transaction ${transaction.id}, assigning voucher atomically...`);
 
-      if (voucherError || !availableVoucher) {
-        console.error('No available voucher found for plan:', transaction.plan_id);
+      const assignmentResult = await assignVoucherAtomically(
+        transaction.plan_id,
+        transaction.user_id,
+        transaction.phone_number,
+        transaction.id
+      );
 
-        // Double-check: maybe voucher was assigned but we have stale data
-        // Re-fetch the transaction to get the latest state
+      if (!assignmentResult.success || !assignmentResult.voucher) {
+        // Check if voucher was assigned concurrently by status polling
         const { data: latestTransaction } = await supabaseAdmin
           .from('transactions')
           .select('voucher_id')
@@ -92,7 +90,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (latestTransaction?.voucher_id) {
-          console.log('🔄 Voucher was assigned during our processing, updating receipt...');
+          console.log('🔄 Voucher was assigned by status polling, updating receipt...');
           await supabaseAdmin
             .from('transactions')
             .update({
@@ -106,6 +104,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Truly no voucher available - mark as failed but with receipt
+        console.error(`❌ No vouchers available for transaction ${transaction.id}`);
         await supabaseAdmin
           .from('transactions')
           .update({
@@ -122,15 +121,8 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Update voucher status
-      await supabaseAdmin
-        .from('vouchers')
-        .update({
-          status: 'sold',
-          sold_to_phone: transaction.phone_number,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', availableVoucher.id);
+      const assignedVoucher = assignmentResult.voucher;
+      console.log(`✅ Voucher ${assignedVoucher.voucher_code} assigned atomically via callback`);
 
       // Get user's commission rate
       const { data: profile } = await supabaseAdmin
@@ -148,7 +140,7 @@ export async function POST(request: NextRequest) {
         .from('transactions')
         .update({
           status: 'completed',
-          voucher_id: availableVoucher.id,
+          voucher_id: assignedVoucher.id,
           mpesa_receipt_number: mpesaReceiptNumber,
           commission_rate: commissionRate,
           commission_amount: commissionAmount,
@@ -157,7 +149,7 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', transaction.id);
 
-      console.log('🎉 Payment successful! Voucher assigned:', availableVoucher.voucher_code);
+      console.log('🎉 Payment successful! Voucher assigned:', assignedVoucher.voucher_code);
       console.log('💰 Commission details:', { commissionRate, commissionAmount, netAmount });
     } else {
       // Payment failed - but only update if there's no voucher assigned (race condition check)

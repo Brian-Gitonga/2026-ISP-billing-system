@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { querySTKPushStatus } from '@/lib/mpesa';
 import { supabaseAdmin } from '@/lib/supabase';
+import { assignVoucherAtomically } from '@/lib/voucher-assignment';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
@@ -97,18 +98,19 @@ export async function GET(request: NextRequest) {
       
       // Check if payment was successful
       if (mpesaStatus.ResultCode === '0') {
-        // Payment successful - find and assign a voucher
-        const { data: availableVoucher, error: voucherError } = await supabaseAdmin
-          .from('vouchers')
-          .select('*')
-          .eq('plan_id', transaction.plan_id)
-          .eq('user_id', transaction.user_id)
-          .eq('status', 'available')
-          .limit(1)
-          .single();
+        // Payment successful - use atomic voucher assignment to prevent race conditions
+        console.log(`💳 Payment successful for transaction ${transaction.id}, assigning voucher atomically...`);
 
-        if (voucherError || !availableVoucher) {
-          // Update transaction as failed - no vouchers available
+        const assignmentResult = await assignVoucherAtomically(
+          transaction.plan_id,
+          transaction.user_id,
+          transaction.phone_number,
+          transaction.id
+        );
+
+        if (!assignmentResult.success || !assignmentResult.voucher) {
+          // No vouchers available - update transaction as failed
+          console.error(`❌ No vouchers available for transaction ${transaction.id}`);
           await supabaseAdmin
             .from('transactions')
             .update({
@@ -119,19 +121,12 @@ export async function GET(request: NextRequest) {
 
           return NextResponse.json({
             status: 'failed',
-            error: 'No available vouchers for this plan',
+            error: assignmentResult.error || 'No available vouchers for this plan',
           });
         }
 
-        // Update voucher status
-        await supabaseAdmin
-          .from('vouchers')
-          .update({
-            status: 'sold',
-            sold_to_phone: transaction.phone_number,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', availableVoucher.id);
+        const assignedVoucher = assignmentResult.voucher;
+        console.log(`✅ Voucher ${assignedVoucher.voucher_code} assigned atomically`);
 
         // Get user's commission rate
         const { data: profile } = await supabaseAdmin
@@ -149,7 +144,7 @@ export async function GET(request: NextRequest) {
           .from('transactions')
           .update({
             status: 'completed',
-            voucher_id: availableVoucher.id,
+            voucher_id: assignedVoucher.id,
             mpesa_receipt_number: mpesaStatus.MpesaReceiptNumber || null,
             commission_rate: commissionRate,
             commission_amount: commissionAmount,
@@ -161,7 +156,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           status: 'completed',
           mpesaReceiptNumber: mpesaStatus.MpesaReceiptNumber,
-          voucher: availableVoucher,
+          voucher: assignedVoucher,
         });
       } else if (mpesaStatus.ResultCode !== '1037' && mpesaStatus.ResultCode !== '1032' && mpesaStatus.ResultCode !== '1001') {
         // Payment failed - but be very conservative about marking as failed
